@@ -19,7 +19,7 @@
       </b-field>
     </div>
 
-    <b-button type="is-primary" class="finish my-6" @click="finish"
+    <b-button type="is-primary" class="finish my-6" @click="finish" :disabled="manifest.name == ''"
       >完了</b-button
     >
   </div>

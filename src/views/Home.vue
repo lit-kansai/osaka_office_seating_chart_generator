@@ -17,14 +17,13 @@
             <input
               type="file"
               class="filepond"
-              id="class_data"
-              onchange="myFunction(e)"
-              accept=".osakascs"
+              ref="tkmsfile"
+              accept=".tkmscs"
             />
             <b-button
               id="start_btn"
               type="is-primary is-large is-fullwidth"
-              disabled
+              :disabled="!isUploaded"
               >席替えページへ</b-button
             >
           </div>
@@ -42,7 +41,7 @@
         <div class="block">
           <h3 class="title is-3">ステップ1 - クラスデータを準備する</h3>
           <p>
-            席替えTokumasaではクラスの情報を1つのファイル（.osakascs）にまとめて使用します。<br />
+            席替えTokumasaではクラスの情報を1つのファイル（.tkmscs）にまとめて使用します。<br />
             このデータには座席に座るメンバーの写真や、人数、テーブル辺りの人数などが記録されています。<br />
             <br />
             <a href="/create/members">クラスデータ生成ページ</a
@@ -53,7 +52,7 @@
           <h3 class="title is-3">ステップ2 - 席替えをする</h3>
           <p>
             ステップ1で生成したクラスデータを元にランダムに席順を決めます。<br />
-            席替えページヘをクリックすると、クラスデータ（.osakascs）を選択する画面が出てくるので選択してください。<br />
+            席替えページヘをクリックすると、クラスデータ（.tkmscs）を選択する画面が出てくるので選択してください。<br />
             ファイルを選択すると自動的にランダムページに移動するので、Enterキーを押すと確定します。<br />
             また、確定と同時にファイルを画像ファイルをダウンロードするように誘導されるのでダウンロードしておいてください。
           </p>
@@ -65,7 +64,35 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import * as FilePond from "filepond";
+import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
+import "filepond/dist/filepond.min.css";
 
 @Component
-export default class Home extends Vue {}
+export default class Home extends Vue {
+  isUploaded = false;
+
+  mounted() {
+    const tkmsfile = this.$refs.tkmsfile as HTMLInputElement
+    FilePond.registerPlugin(FilePondPluginFileValidateType);
+    const pond = FilePond.create(tkmsfile, {
+      acceptedFileTypes: [".tkmscs"],
+      fileValidateTypeDetectType: (src: any, type) =>
+        new Promise((res, rej) => {
+          const name = src.name.split(".");
+          if (name[name.length - 1] == "tkmscs") return res(".tkmscs");
+          if (!type) return rej();
+          res(type);
+        }),
+      labelFileTypeNotAllowed: "ファイル形式が正しくありません",
+      fileValidateTypeLabelExpectedTypes: "{lastType}形式である必要があります",
+    });
+    
+    pond.onupdatefiles = (files: any) => {
+      if(files.length == 0) return (this.isUploaded = false);
+      const name = files[0].file.name.split(".");
+      this.isUploaded = name[name.length - 1] == "tkmscs"
+    }
+  }
+}
 </script>
