@@ -72,16 +72,13 @@ export default class Create1 extends Vue {
 
         const files = e.dataTransfer?.files;
         if (!files) return;
-        [...files].forEach((f) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            this.members.push({
-              name: f.name.split(".").slice(0, -1).join("."),
-              image: f,
-              url: reader.result,
-            } as Member);
-          };
-          reader.readAsDataURL(f);
+        [...files].forEach(async (f) => {
+          const buffer = await f.arrayBuffer()
+          this.members.push({
+            name: f.name.split(".").slice(0, -1).join("."),
+            image: buffer,
+            url: window.URL.createObjectURL(f),
+          } as Member);
         });
       },
       false

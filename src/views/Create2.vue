@@ -27,7 +27,7 @@
         </div>
       </div>
     </div>
-    <b-button type="is-primary" class="next my-6" :disabled="remains > 0"
+    <b-button type="is-primary" class="next my-6" :disabled="remains > 0" @click="next"
       >次へ</b-button
     >
   </div>
@@ -113,6 +113,11 @@ export default class Create2 extends Vue {
 
   get remains() {
     return this.memberCount - this.tables.reduce((a, b) => a + b);
+  }
+
+  next() {
+    this.$store.commit("setTables", this.tables);
+    this.$router.push("/create/info");
   }
 }
 </script>

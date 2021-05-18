@@ -5,7 +5,8 @@ import { Member, State } from "@/models";
 Vue.use(Vuex);
 
 const state: State = {
-  members: []
+  members: [],
+  tables: []
 }
 
 export default new Vuex.Store({
@@ -13,6 +14,9 @@ export default new Vuex.Store({
   mutations: {
     setMembers (state: State, members: Member[]) {
       state.members = members
+    },
+    setTables (state: State, tables: number[]) {
+      state.tables = tables
     }
   },
   actions: {},

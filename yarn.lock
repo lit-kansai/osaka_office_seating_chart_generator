@@ -9476,3 +9476,8 @@ yorkie@^2.0.0:
     is-ci "^1.0.10"
     normalize-path "^1.0.0"
     strip-indent "^2.0.0"
+
+zlibt2@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/zlibt2/-/zlibt2-0.5.1.tgz#585b4a1891ab2b671bcba759c4f74449fe21c865"
+  integrity sha512-gw6EkXdBvald3H3I1t5jo5cRUpjn8mdDIChndgZn1QgV/Qssq6cDgzXxnKlv9Dka3AaClMnzqAdS9eF+vR3qWA==
