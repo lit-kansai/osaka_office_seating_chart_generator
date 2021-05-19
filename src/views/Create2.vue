@@ -71,16 +71,16 @@ export default class Create2 extends Vue {
 
       const drawTables = () => {
         const r = 0.065;
-        drawTable(this.tables[0], 0.119, 0.53, r);
-        drawTable(this.tables[1], 0.3095, 0.53, r);
-        drawTable(this.tables[2], 0.5, 0.53, r);
-        drawTable(this.tables[3], 0.6905, 0.53, r);
-        drawTable(this.tables[4], 0.881, 0.53, r);
-        drawTable(this.tables[5], 0.119, 0.78, r);
-        drawTable(this.tables[6], 0.3095, 0.78, r);
-        drawTable(this.tables[7], 0.5, 0.78, r);
-        drawTable(this.tables[8], 0.6905, 0.78, r);
-        drawTable(this.tables[9], 0.881, 0.78, r);
+        drawTable(this.tables[0], 0.119, 0.505, r);
+        drawTable(this.tables[1], 0.3095, 0.505, r);
+        drawTable(this.tables[2], 0.5, 0.505, r);
+        drawTable(this.tables[3], 0.6905, 0.505, r);
+        drawTable(this.tables[4], 0.881, 0.505, r);
+        drawTable(this.tables[5], 0.119, 0.755, r);
+        drawTable(this.tables[6], 0.3095, 0.755, r);
+        drawTable(this.tables[7], 0.5, 0.755, r);
+        drawTable(this.tables[8], 0.6905, 0.755, r);
+        drawTable(this.tables[9], 0.881, 0.755, r);
       };
 
       function drawTable(members: number, xp: number, yp: number, r: number) {

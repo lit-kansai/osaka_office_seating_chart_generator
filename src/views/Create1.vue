@@ -47,6 +47,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { Member } from "@/models";
+import p5 from "p5";
 
 @Component
 export default class Create1 extends Vue {
@@ -73,12 +74,39 @@ export default class Create1 extends Vue {
         const files = e.dataTransfer?.files;
         if (!files) return;
         [...files].forEach(async (f) => {
-          const buffer = await f.arrayBuffer()
-          this.members.push({
-            name: f.name.split(".").slice(0, -1).join("."),
-            image: buffer,
-            url: window.URL.createObjectURL(f),
-          } as Member);
+          const script = (p5: p5) => {
+            let i: p5.Image; 
+            const size = 200;
+
+            p5.preload = () => {
+              i = p5.loadImage(window.URL.createObjectURL(f))
+            }
+
+            p5.setup = () => {
+              const canvas = p5.createCanvas(size, size);
+              canvas.elt.style.display = "none"
+              p5.imageMode(p5.CENTER);
+              p5.background(220);
+              
+              const isLandscape = i.width > i.height
+              const short = isLandscape ? i.height : i.width
+              
+              const long = (isLandscape ? i.width : i.height) * (size / short);
+              p5.image(i, p5.width / 2, p5.height / 2, isLandscape ? long : size, isLandscape ? size: long );
+
+              const c = (canvas.elt as HTMLCanvasElement)
+              c.toBlob(async blob => {
+                const buffer = await blob?.arrayBuffer()
+                this.members.push({
+                  name: f.name.split(".").slice(0, -1).join("."),
+                  image: buffer,
+                  url: window.URL.createObjectURL(blob),
+                } as Member);
+              })
+            };
+          };
+
+          new p5(script);
         });
       },
       false
