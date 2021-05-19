@@ -37,6 +37,7 @@ export default class Random extends Vue {
         let backImage: p5.Image;
         let noto: p5.Font;
         let enterOn = false;
+        let canvas: p5.Renderer
         let members: p5Member[] = [];
 
         p5.preload = () => {
@@ -62,7 +63,7 @@ export default class Random extends Vue {
           const isLandscape = p5.windowWidth / 4 > p5.windowHeight / 3;
           const w = isLandscape ? (p5.windowHeight / 3) * 4 : p5.windowWidth;
           const h = isLandscape ? p5.windowHeight : (p5.windowWidth / 4) * 3;
-          const canvas = p5.createCanvas(w, h, p5.WEBGL);
+          canvas = p5.createCanvas(w, h, p5.WEBGL);
           canvas.parent("canvas");
           p5.frameRate(10);
           p5.rectMode(p5.CENTER);
@@ -82,7 +83,10 @@ export default class Random extends Vue {
         };
 
         p5.keyPressed = () => {
-          if (p5.keyCode == 13) enterOn = true;
+          if (p5.keyCode == 13 && !enterOn) {
+            enterOn = true;
+            p5.saveCanvas(canvas,this.manifest.name + "_" + new Date().toLocaleDateString().replaceAll(/\//g, "-"),"png");
+          }
         };
 
         const drawRandom = () => {
