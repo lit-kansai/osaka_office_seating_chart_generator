@@ -12,6 +12,15 @@
     <div class="container my-4">
       <section class="section">
         <h2 class="title is-2">メインメニュー</h2>
+        <b-message
+          title="Error"
+          type="is-danger"
+          v-if="this.$route.query.error == 'invalid'"
+          has-icon
+        >
+          指定されたファイルは正しい.tkmscsではなかったため失敗しました。<br>クラスデータを生成しなおして再度実行してみてください。
+        </b-message>
+
         <div class="columns">
           <div class="column">
             <input
@@ -23,7 +32,8 @@
             <b-button
               id="start_btn"
               type="is-primary is-large is-fullwidth"
-              :disabled="!isUploaded"
+              :disabled="!file"
+              @click="next"
               >席替えページへ</b-button
             >
           </div>
@@ -36,6 +46,7 @@
           </div>
         </div>
       </section>
+
       <section class="section">
         <h2 class="title is-2">使い方</h2>
         <div class="block">
@@ -44,7 +55,8 @@
             席替えTokumasaではクラスの情報を1つのファイル（.tkmscs）にまとめて使用します。<br />
             このデータには座席に座るメンバーの写真や、人数、テーブル辺りの人数などが記録されています。<br />
             <br />
-            <a href="/create/members">クラスデータ生成ページ</a
+            <router-link to="/create/members"
+              >クラスデータ生成ページ</router-link
             >へ移動し、手順に従って生成してください。
           </p>
         </div>
@@ -70,10 +82,10 @@ import "filepond/dist/filepond.min.css";
 
 @Component
 export default class Home extends Vue {
-  isUploaded = false;
+  file: File | null = null;
 
   mounted() {
-    const tkmsfile = this.$refs.tkmsfile as HTMLInputElement
+    const tkmsfile = this.$refs.tkmsfile as HTMLInputElement;
     FilePond.registerPlugin(FilePondPluginFileValidateType);
     const pond = FilePond.create(tkmsfile, {
       acceptedFileTypes: [".tkmscs"],
@@ -87,12 +99,17 @@ export default class Home extends Vue {
       labelFileTypeNotAllowed: "ファイル形式が正しくありません",
       fileValidateTypeLabelExpectedTypes: "{lastType}形式である必要があります",
     });
-    
+
     pond.onupdatefiles = (files: any) => {
-      if(files.length == 0) return (this.isUploaded = false);
+      if (files.length == 0) return (this.file = null);
       const name = files[0].file.name.split(".");
-      this.isUploaded = name[name.length - 1] == "tkmscs"
-    }
+      if (name[name.length - 1] == "tkmscs") this.file = files[0].file;
+      else this.file = null;
+    };
+  }
+  next() {
+    this.$store.commit("setFile", this.file);
+    this.$router.push("/random");
   }
 }
 </script>

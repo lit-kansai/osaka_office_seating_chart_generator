@@ -1,6 +1,7 @@
 export interface State {
-  members: Member[]
-  tables: number[]
+  members: Member[];
+  tables: number[];
+  file: File | null;
 }
 
 export interface Member {
@@ -10,13 +11,21 @@ export interface Member {
 }
 
 export interface ManifestMember {
-  name: string,
-  file: string
+  name: string;
+  file: string;
 }
 
-export interface Manifest {
-  name: string,
-  members: ManifestMember[],
-  table: string,
-  tables: number[]
+export class Manifest {
+  name = "";
+  members: ManifestMember[] = [];
+  table = "";
+  tables: number[] = [];
+
+  constructor(init?: Partial<Manifest>) {
+    Object.assign(this, init);
+  }
+
+  public toObject(): any {
+    return Object.assign({}, this);
+  }
 }

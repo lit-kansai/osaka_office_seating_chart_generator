@@ -1074,10 +1074,10 @@
   resolved "https://registry.npm.taobao.org/@types/minimist/download/@types/minimist-1.2.1.tgz?cache=0&sync_timestamp=1613379547652&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fminimist%2Fdownload%2F%40types%2Fminimist-1.2.1.tgz#283f669ff76d7b8260df8ab7a4262cc83d988256"
   integrity sha1-KD9mn/dte4Jg34q3pCYsyD2YglY=
 
-"@types/node@*":
+"@types/node@*", "@types/node@^15.3.0":
   version "15.3.0"
-  resolved "https://registry.nlark.com/@types/node/download/@types/node-15.3.0.tgz?cache=0&sync_timestamp=1621019587972&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-15.3.0.tgz#d6fed7d6bc6854306da3dea1af9f874b00783e26"
-  integrity sha1-1v7X1rxoVDBto96hr5+HSwB4PiY=
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.3.0.tgz#d6fed7d6bc6854306da3dea1af9f874b00783e26"
+  integrity sha512-8/bnjSZD86ZfpBsDlCIkNXIvm+h6wi9g7IqL+kmFkQ+Wvu3JrasgLElfiPgoo8V8vVfnEi0QVS12gbl94h9YsQ==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
@@ -9486,6 +9486,11 @@ yorkie@^2.0.0:
     is-ci "^1.0.10"
     normalize-path "^1.0.0"
     strip-indent "^2.0.0"
+
+zlibjs@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/zlibjs/-/zlibjs-0.3.1.tgz#50197edb28a1c42ca659cc8b4e6a9ddd6d444554"
+  integrity sha1-UBl+2yihxCymWcyLTmqd3W1ERVQ=
 
 zlibt2@^0.5.1:
   version "0.5.1"

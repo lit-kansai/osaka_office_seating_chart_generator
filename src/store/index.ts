@@ -6,7 +6,8 @@ Vue.use(Vuex);
 
 const state: State = {
   members: [],
-  tables: []
+  tables: [],
+  file: null
 }
 
 export default new Vuex.Store({
@@ -17,6 +18,9 @@ export default new Vuex.Store({
     },
     setTables (state: State, tables: number[]) {
       state.tables = tables
+    },
+    setFile (state: State, file: File) {
+      state.file = file
     }
   },
   actions: {},

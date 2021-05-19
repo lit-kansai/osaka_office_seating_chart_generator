@@ -4,6 +4,7 @@ import Home from "@/views/Home.vue";
 import Create1 from "@/views/Create1.vue";
 import Create2 from "@/views/Create2.vue";
 import Create3 from "@/views/Create3.vue";
+import Random from "@/views/Random.vue";
 
 Vue.use(VueRouter);
 
@@ -27,6 +28,11 @@ const routes: Array<RouteConfig> = [
     path: "/create/info",
     name: "Create3",
     component: Create3,
+  },
+  {
+    path: "/random",
+    name: "Random",
+    component: Random,
   },
 ];
 

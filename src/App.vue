@@ -5,6 +5,9 @@
 </template>
 
 <style lang="stylus">
+html {
+  overflow-y: auto !important;
+}
 .tokumasa-title {
   cursor: pointer;
   width: fit-content;

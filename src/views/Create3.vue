@@ -34,12 +34,12 @@ import { Zip } from "zlibt2";
 export default class Create3 extends Vue {
 
   members: Member[] = this.$store.state.members;
-  manifest: Manifest = {
+  manifest: Manifest = new Manifest({
     name: "",
     members: [],
     tables: this.$store.state.tables,
     table: "table.png"
-  };
+  });
 
   mounted() {
     if (this.$store.state.members.length == 0)
