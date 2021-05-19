@@ -9,16 +9,17 @@
       </div>
     </section>
 
-    <div class="container my-4">
+    <div class="container my-4 is-max-desktop">
       <section class="section">
-        <h2 class="title is-2">メインメニュー</h2>
+        <h2 class="title is-2 mb-6">メインメニュー</h2>
+          
         <b-message
           title="Error"
           type="is-danger"
           v-if="this.$route.query.error == 'invalid'"
           has-icon
         >
-          指定されたファイルは正しい.tkmscsではなかったため失敗しました。<br>クラスデータを生成しなおして再度実行してみてください。
+          指定されたファイルは正しい.tkmscsではなかったため失敗しました。<br />クラスデータを生成しなおして再度実行してみてください。
         </b-message>
 
         <div class="columns">
@@ -31,17 +32,36 @@
             />
             <b-button
               id="start_btn"
+              class="my-2"
               type="is-primary is-large is-fullwidth"
               :disabled="!file"
               @click="next"
-              >席替えページへ</b-button
+              >席替え開始！</b-button
             >
-          </div>
-          <div class="column">
+            <div class="columns">
+              <div class="column">
+                <b-button
+                  id="start_btn"
+                  type="is-info is-fullwidth"
+                  :disabled="!file"
+                  @click="createSeatMap"
+                  >座席図作成</b-button
+                >
+              </div>
+              <div class="column">
+                <b-button
+                  type="is-fullwidth is-dark"
+                  disabled
+                  >クラスデータ編集（実装中）</b-button
+                >
+              </div>
+            </div>
+            <hr>
             <b-button
+              class="mb-2"
               type="is-large is-fullwidth"
               @click="$router.push('/create/members')"
-              >クラスデータ生成ページへ</b-button
+              >クラスデータ新規作成</b-button
             >
           </div>
         </div>
@@ -98,7 +118,8 @@ export default class Home extends Vue {
         }),
       labelFileTypeNotAllowed: "ファイル形式が正しくありません",
       fileValidateTypeLabelExpectedTypes: "{lastType}形式である必要があります",
-      labelIdle: '.tkmscsファイルをここにドラッグ&ドロップするか<span class="filepond--label-action"> ファイルを選択 </span>してください'
+      labelIdle:
+        '.tkmscsファイルをここにドラッグ&ドロップするか<span class="filepond--label-action"> ファイルを選択 </span>してください',
     });
 
     pond.onupdatefiles = (files: any) => {
@@ -111,6 +132,10 @@ export default class Home extends Vue {
   next() {
     this.$store.commit("setFile", this.file);
     this.$router.push("/random");
+  }
+  createSeatMap() {
+    this.$store.commit("setFile", this.file);
+    this.$router.push("/seatmap");
   }
 }
 </script>

@@ -21,7 +21,8 @@ export class Manifest {
   table = "";
   tables: number[] = [];
 
-  constructor(init?: Partial<Manifest>) {
+  constructor(init?: Partial<Manifest>, buffer?: BufferSource) {
+    if(buffer) init = JSON.parse(new TextDecoder().decode(buffer))
     Object.assign(this, init);
   }
 

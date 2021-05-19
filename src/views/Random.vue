@@ -51,7 +51,7 @@ export default class Random extends Vue {
             image: p5.loadImage(
               window.URL.createObjectURL(
                 new Blob([unzip.decompress(member.file)], {
-                  type: "image/jpeg",
+                  type: "image/png",
                 })
               )
             ),
