@@ -38,7 +38,7 @@
       type="is-primary"
       @click="next"
       class="next my-6"
-      :disabled="members.length == 0"
+      :disabled="members.length == 0 || members.some(m => m.name == '')"
       >次へ</b-button
     >
   </div>
