@@ -98,6 +98,7 @@ export default class Home extends Vue {
         }),
       labelFileTypeNotAllowed: "ファイル形式が正しくありません",
       fileValidateTypeLabelExpectedTypes: "{lastType}形式である必要があります",
+      labelIdle: '.tkmscsファイルをここにドラッグ&ドロップするか<span class="filepond--label-action"> ファイルを選択 </span>してください'
     });
 
     pond.onupdatefiles = (files: any) => {
