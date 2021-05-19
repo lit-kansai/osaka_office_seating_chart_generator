@@ -52,7 +52,7 @@ export default class Create3 extends Vue {
     const zip = new Zip();
     
     this.manifest.members = this.members.map((m, i) => {
-      const filename = `photo/photo${('00' + i).slice(-2)}.jpg`;
+      const filename = `photo/photo${('00' + i).slice(-2)}.png`;
       zip.addFile(new Uint8Array(m.image), {
         filename: new TextEncoder().encode(filename),
       });
