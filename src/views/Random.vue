@@ -46,7 +46,7 @@ export default class Random extends Vue {
     } catch (e) {
       console.error(e);
       return this.$router.push("/?error=invalid");
-    }
+    }			
 
     const script = (p5: p5) => {
       let backImage: p5.Image;
@@ -196,6 +196,7 @@ export default class Random extends Vue {
     };
 
     new p5(script);
+    document.body.requestFullscreen();	
   }
 }
 </script>
