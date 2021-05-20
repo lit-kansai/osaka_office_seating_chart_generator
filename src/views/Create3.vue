@@ -28,7 +28,7 @@
 <script lang="ts">
 import { Manifest, Member } from "@/models";
 import { Component, Vue } from "vue-property-decorator";
-import { Zip } from "zlibt2";
+import { Zlib as ZlibZip } from "zlibjs/bin/zip.min";
 
 @Component
 export default class Create3 extends Vue {
@@ -49,7 +49,7 @@ export default class Create3 extends Vue {
   }
 
   async finish() {
-    const zip = new Zip();
+    const zip = new ZlibZip.Zip();
     
     this.manifest.members = this.members.map((m, i) => {
       const filename = `photo/photo${('00' + i).slice(-2)}.png`;
