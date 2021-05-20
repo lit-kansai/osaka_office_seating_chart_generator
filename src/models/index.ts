@@ -1,3 +1,5 @@
+import p5 from 'p5';
+
 export interface State {
   members: Member[];
   tables: number[];
@@ -29,4 +31,21 @@ export class Manifest {
   public toObject(): any {
     return Object.assign({}, this);
   }
+}
+
+export interface p5Member {
+  url: string;
+  image: p5.Image;
+  name: string;
+}
+
+export interface Position {
+  x: number;
+  y: number;
+}
+
+export interface Seat {
+  x: (w: number) => number;
+  y: (w: number, h: number) => number;
+  r: (w: number) => number;
 }

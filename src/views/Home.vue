@@ -28,7 +28,7 @@
               type="file"
               class="filepond"
               ref="tkmsfile"
-              accept=".tkmscs"
+              accept=".tkmsc, .tkmscs"
             />
             <b-button
               id="start_btn"
@@ -108,10 +108,11 @@ export default class Home extends Vue {
     const tkmsfile = this.$refs.tkmsfile as HTMLInputElement;
     FilePond.registerPlugin(FilePondPluginFileValidateType);
     const pond = FilePond.create(tkmsfile, {
-      acceptedFileTypes: [".tkmscs"],
+      acceptedFileTypes: [".tkmscs", ".tkmsc"],
       fileValidateTypeDetectType: (src: any, type) =>
         new Promise((res, rej) => {
           const name = src.name.split(".");
+          if (name[name.length - 1] == "tkmsc") return res(".tkmsc");
           if (name[name.length - 1] == "tkmscs") return res(".tkmscs");
           if (!type) return rej();
           res(type);
@@ -125,7 +126,9 @@ export default class Home extends Vue {
     pond.onupdatefiles = (files: any) => {
       if (files.length == 0) return (this.file = null);
       const name = files[0].file.name.split(".");
-      if (name[name.length - 1] == "tkmscs") this.file = files[0].file;
+      console.log(name[name.length - 1])
+      if (name[name.length - 1] == "tkmsc") this.file = files[0].file;
+      else if (name[name.length - 1] == "tkmscs") this.file = files[0].file;
       else this.file = null;
     };
   }

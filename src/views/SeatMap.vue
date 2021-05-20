@@ -44,24 +44,8 @@ import { Component, Vue } from "vue-property-decorator";
 import p5 from "p5";
 import { Zlib as ZlibZip } from "zlibjs/bin/zip.min";
 import { Zlib as ZlibUnzip } from "zlibjs/bin/unzip.min";
-import { Manifest } from "@/models";
-
-interface p5Member {
-  url: string;
-  image: p5.Image;
-  name: string;
-}
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-interface Seat {
-  x: (w: number) => number;
-  y: (w: number, h: number) => number;
-  r: (w: number) => number;
-}
+import { Manifest, p5Member, Seat } from "@/models";
+import { Position } from "node_modules/vue-router/types/router";
 
 @Component
 export default class SeatMap extends Vue {
@@ -160,19 +144,19 @@ export default class SeatMap extends Vue {
         p5.rect(0, 0, p5.width, p5.height);
         p5.stroke(0);
         p5.translate(-p5.width / 2, -p5.height / 2);
-        drawMembers();
+        drawMembers(this.members);
       };
 
-      const drawMembers = () => {
-        const m = this.members.find((m) => m.name == dragging);
+      const drawMembers = (members: p5Member[]) => {
+        const m = members.find((m) => m.name == dragging);
         this.seats.forEach((seat, i) => {
-          const member = this.members[i];
-          if (this.members[i] == m) return;
+          const member = members[i];
+          if (members[i] == m) return;
           const image = getImageByName(member.name);
           if (image) p5.texture(image);
           p5.ellipse(seat.x(p5.width), seat.y(p5.width, p5.height), seat.r(p5.width) * 2);
           p5.textSize(p5.width / 80);
-          p5.text(this.members[i].name, seat.x(p5.width), seat.y(p5.width, p5.height) + p5.width * 0.03);
+          p5.text(members[i].name, seat.x(p5.width), seat.y(p5.width, p5.height) + p5.width * 0.03);
         });
         if (m) {
           const image = getImageByName(m.name);
@@ -184,7 +168,7 @@ export default class SeatMap extends Vue {
       };
 
       function calcCanvasSize() {
-        const box = document.querySelector(".canvas-box") as HTMLCanvasElement;
+        const box = document.querySelector("#canvas") as HTMLCanvasElement;
         if (!box) return { w: 640, h: 480 };
         const width = box.clientWidth;
         const height = box.clientHeight - 24;

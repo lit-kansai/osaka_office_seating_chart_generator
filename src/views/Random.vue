@@ -1,163 +1,208 @@
 <template>
-  <div class="random">
-    <div class="random-canvas" id="canvas"></div>
-  </div>
+  <div class="random-canvas" id="canvas"></div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import p5 from "p5";
-import { Zlib } from "zlibjs/bin/unzip.min";
-import { Manifest } from "@/models";
-
-interface p5Member {
-  image: p5.Image;
-  name: string;
-}
+import { Zlib as ZlibUnzip } from "zlibjs/bin/unzip.min";
+import { Manifest, p5Member, Seat } from "@/models";
+import { Position } from "node_modules/vue-router/types/router";
 
 @Component
 export default class Random extends Vue {
   manifest: Manifest = {} as Manifest;
+  members: p5Member[] = [];
+  seats: Seat[] = [];
+  chart: string[] = [];
+  tkmscs: File = this.$store.state.file;
+  tableImageUrl = "";
+
+  async decompress() {
+    const tkmscsArray = await this.tkmscs.arrayBuffer();
+    const unzip = new ZlibUnzip.Unzip(new Uint8Array(tkmscsArray));
+    if (!unzip.getFilenames().includes("manifest.json"))
+      return this.$router.push("/?error=invalid");
+
+    this.manifest = new Manifest({}, unzip.decompress("manifest.json"));
+    const tableImage = new Blob([unzip.decompress(this.manifest.table)]);
+    this.tableImageUrl = window.URL.createObjectURL(tableImage);
+    this.members = this.manifest.members.map((m) => ({
+      url: window.URL.createObjectURL(new Blob([unzip.decompress(m.file)])),
+      name: m.name,
+      image: new p5.Image(),
+    }));
+    if (unzip.getFilenames().includes("chart.json"))
+      this.chart = JSON.parse(
+        new TextDecoder().decode(unzip.decompress("chart.json"))
+      ).chart;
+  }
 
   async mounted() {
     if (this.$store.state.file == null) return this.$router.push("/");
 
     try {
-      const unzip = new Zlib.Unzip(
-        new Uint8Array(await this.$store.state.file.arrayBuffer())
-      );
-      if (!unzip.getFilenames().includes("manifest.json"))
-        return this.$router.push("/?error=invalid");
-
-      this.manifest = new Manifest(
-        JSON.parse(new TextDecoder().decode(unzip.decompress("manifest.json")))
-      );
-
-      const script = (p5: p5) => {
-        let backImage: p5.Image;
-        let noto: p5.Font;
-        let enterOn = false;
-        let canvas: p5.Renderer
-        let members: p5Member[] = [];
-
-        p5.preload = () => {
-          backImage = p5.loadImage(
-            window.URL.createObjectURL(
-              new Blob([unzip.decompress(this.manifest.table)])
-            )
-          );
-          noto = p5.loadFont("noto.otf");
-          members = this.manifest.members.map((member) => ({
-            image: p5.loadImage(
-              window.URL.createObjectURL(
-                new Blob([unzip.decompress(member.file)], {
-                  type: "image/png",
-                })
-              )
-            ),
-            name: member.name,
-          }));
-        };
-
-        p5.setup = () => {
-          const isLandscape = p5.windowWidth / 4 > p5.windowHeight / 3;
-          const w = isLandscape ? (p5.windowHeight / 3) * 4 : p5.windowWidth;
-          const h = isLandscape ? p5.windowHeight : (p5.windowWidth / 4) * 3;
-          canvas = p5.createCanvas(w, h, p5.WEBGL);
-          canvas.parent("canvas");
-          p5.frameRate(10);
-          p5.rectMode(p5.CENTER);
-          p5.textFont(noto);
-          p5.fill(0);
-          p5.textAlign(p5.CENTER, p5.CENTER);
-        };
-
-        p5.draw = () => {
-          if (!enterOn) {
-            p5.texture(backImage);
-            p5.noStroke();
-            p5.rect(0, 0, p5.width, p5.height);
-            p5.stroke(0);
-            drawRandom();
-          }
-        };
-
-        p5.keyPressed = () => {
-          if (p5.keyCode == 13 && !enterOn) {
-            enterOn = true;
-            p5.saveCanvas(canvas,this.manifest.name + "_" + new Date().toLocaleDateString().replaceAll(/\//g, "-"),"png");
-          }
-        };
-
-        const drawRandom = () => {
-          const random = members
-            .map((a) => ({ w: Math.random(), v: a }))
-            .sort((a, b) => a.w - b.w)
-            .map((a) => a.v);
-
-          p5.translate(-p5.width / 2, -p5.height / 2);
-          drawTables(random, this.manifest.tables);
-        };
-
-        const drawTables = (members: p5Member[], tables: number[]) => {
-          const r = 0.065;
-          drawTable(members.splice(0, tables[0]), 0.119, 0.505, r);
-          drawTable(members.splice(0, tables[1]), 0.3095, 0.505, r);
-          drawTable(members.splice(0, tables[2]), 0.5, 0.505, r);
-          drawTable(members.splice(0, tables[3]), 0.6905, 0.505, r);
-          drawTable(members.splice(0, tables[4]), 0.881, 0.505, r);
-          drawTable(members.splice(0, tables[5]), 0.119, 0.755, r);
-          drawTable(members.splice(0, tables[6]), 0.3095, 0.755, r);
-          drawTable(members.splice(0, tables[7]), 0.5, 0.755, r);
-          drawTable(members.splice(0, tables[8]), 0.6905, 0.755, r);
-          drawTable(members.splice(0, tables[9]), 0.881, 0.755, r);
-        };
-
-        const drawTable = (
-          members: p5Member[],
-          xp: number,
-          yp: number,
-          r: number
-        ) => {
-          members.forEach((m, i) => {
-            const _rad =
-              (i / members.length) * p5.PI * 2 +
-              p5.PI / 2 +
-              p5.PI +
-              p5.PI / members.length;
-            const x = r * p5.width * p5.cos(_rad) + p5.width * xp;
-            const y = r * p5.width * p5.sin(_rad) + p5.height * yp;
-
-            const w = p5.width * 0.05;
-            const h = p5.width * 0.05;
-
-            p5.texture(m.image);
-            p5.ellipse(x, y, w, h);
-            p5.textSize(p5.width / 80);
-            p5.text(m.name, x, y + p5.width * 0.03);
-          });
-        };
-
-        p5.windowResized = () => {
-          const isLandscape = p5.windowWidth / 4 > p5.windowHeight / 3;
-          const w = isLandscape ? (p5.windowHeight / 3) * 4 : p5.windowWidth;
-          const h = isLandscape ? p5.windowHeight : (p5.windowWidth / 4) * 3;
-          p5.resizeCanvas(w, h);
-        };
-      };
-
-      new p5(script);
+      await this.decompress();
     } catch (e) {
       console.error(e);
       return this.$router.push("/?error=invalid");
     }
+
+    const script = (p5: p5) => {
+      let backImage: p5.Image;
+      let noto: p5.Font;
+      let canvas: p5.Renderer;
+      let dragging: any = null;
+      let enterOn = false;
+
+      const tablePosition: Position[] = [
+        { x: 0.119, y: 0.505 },
+        { x: 0.3095, y: 0.505 },
+        { x: 0.5, y: 0.505 },
+        { x: 0.6905, y: 0.505 },
+        { x: 0.881, y: 0.505 },
+        { x: 0.119, y: 0.755 },
+        { x: 0.3095, y: 0.755 },
+        { x: 0.5, y: 0.755 },
+        { x: 0.6905, y: 0.755 },
+        { x: 0.881, y: 0.755 },
+      ];
+
+      p5.preload = () => {
+        backImage = p5.loadImage(this.tableImageUrl);
+        this.members = this.members.map((i) => ({
+          ...i,
+          image: p5.loadImage(i.url),
+        }));
+        if (this.chart.length > 0) {
+          this.members.sort(
+            (a, b) => this.chart.indexOf(a.name) - this.chart.indexOf(b.name)
+          );
+        } else {
+          this.members = this.members
+            .map((a) => ({ w: Math.random(), v: a }))
+            .sort((a, b) => a.w - b.w)
+            .map((a) => a.v);
+        }
+        noto = p5.loadFont("noto.otf");
+      };
+
+      p5.setup = () => {
+        const size = calcCanvasSize();
+        canvas = p5.createCanvas(size.w, size.h, p5.WEBGL);
+        canvas.parent("canvas");
+        p5.rectMode(p5.CENTER);
+        p5.textFont(noto);
+        p5.fill(0);
+        p5.frameRate(10);
+        p5.textAlign(p5.CENTER, p5.CENTER);
+
+        const memberData = [...this.members];
+        this.manifest.tables.forEach((tables, tableCount) => {
+          const tableMembers = memberData.splice(0, tables);
+          tableMembers.forEach((m, i) => {
+            const rad = calcRadian(i, tableMembers.length);
+            this.seats.push({
+              x: (w) =>
+                0.065 * w * p5.cos(rad) + w * tablePosition[tableCount].x,
+              y: (w, h) =>
+                0.065 * w * p5.sin(rad) + h * tablePosition[tableCount].y,
+              r: (w) => (w * 0.05) / 2,
+            });
+          });
+        });
+      };
+
+      p5.draw = () => {
+        p5.texture(backImage);
+        p5.noStroke();
+        p5.rect(0, 0, p5.width, p5.height);
+        p5.stroke(0);
+        p5.translate(-p5.width / 2, -p5.height / 2);
+
+        const random = !enterOn
+          ? this.members
+              .map((a) => ({ w: Math.random(), v: a }))
+              .sort((a, b) => a.w - b.w)
+              .map((a) => a.v)
+          : this.members;
+        drawMembers(random);
+      };
+
+      p5.keyPressed = () => {
+        if (p5.keyCode == 13 && !enterOn) {
+          enterOn = true;
+          setTimeout(() => {
+            p5.resizeCanvas(1600, 1200);
+            p5.saveCanvas(
+              canvas,
+              this.manifest.name +
+                "_" +
+                new Date().toLocaleDateString().replaceAll(/\//g, "-"),
+              "png"
+            );
+            p5.windowResized();
+          }, 200);
+        }
+      };
+      const drawMembers = (members: p5Member[]) => {
+        const m = members.find((m) => m.name == dragging);
+        this.seats.forEach((seat, i) => {
+          const member = members[i];
+          if (members[i] == m) return;
+          const image = getImageByName(member.name);
+          if (image) p5.texture(image);
+          p5.ellipse(
+            seat.x(p5.width),
+            seat.y(p5.width, p5.height),
+            seat.r(p5.width) * 2
+          );
+          p5.textSize(p5.width / 80);
+          p5.text(
+            members[i].name,
+            seat.x(p5.width),
+            seat.y(p5.width, p5.height) + p5.width * 0.03
+          );
+        });
+        if (m) {
+          const image = getImageByName(m.name);
+          if (image) p5.texture(image);
+          p5.ellipse(p5.mouseX, p5.mouseY, p5.width * 0.05);
+          p5.textSize(p5.width / 80);
+          p5.text(m.name, p5.mouseX, p5.mouseY + p5.width * 0.03);
+        }
+      };
+
+      function calcCanvasSize() {
+        const box = document.querySelector("#canvas") as HTMLCanvasElement;
+        if (!box) return { w: 640, h: 480 };
+        const width = box.clientWidth;
+        const height = box.clientHeight - 24;
+        const isLandscape = width / 4 > height / 3;
+        return {
+          w: isLandscape ? (height / 3) * 4 : width,
+          h: isLandscape ? height : (width / 4) * 3,
+        };
+      }
+
+      const getImageByName = (name: string) =>
+        this.members.find((i) => i.name == name)?.image;
+
+      const calcRadian = (pos: number, cap: number) =>
+        (pos / cap) * p5.PI * 2 + p5.PI / 2 + p5.PI + p5.PI / cap;
+
+      p5.windowResized = () =>
+        p5.resizeCanvas(calcCanvasSize().w, calcCanvasSize().h);
+    };
+
+    new p5(script);
   }
 }
 </script>
 
 
-<style lang="stylus">
-.random {
+<style lang="stylus" scoped>
+#canvas {
   background: #ffffb8;
   height: 100vh;
   width: 100vw;
