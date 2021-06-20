@@ -5,48 +5,21 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import p5 from "p5";
-import { Zlib as ZlibUnzip } from "zlibjs/bin/unzip.min";
-import { Manifest, p5Member, Seat } from "@/models";
+import { p5Member, Seat } from "@/models";
+import { Tkms } from "@/models/tkms";
 import { Position } from "node_modules/vue-router/types/router";
 
 @Component
 export default class Random extends Vue {
-  manifest: Manifest = {} as Manifest;
+  tkms: Tkms = new Tkms();
   members: p5Member[] = [];
   seats: Seat[] = [];
-  chart: string[] = [];
-  tkmscs: File = this.$store.state.file;
-  tableImageUrl = "";
-
-  async decompress() {
-    const tkmscsArray = await this.tkmscs.arrayBuffer();
-    const unzip = new ZlibUnzip.Unzip(new Uint8Array(tkmscsArray));
-    if (!unzip.getFilenames().includes("manifest.json"))
-      return this.$router.push("/?error=invalid");
-
-    this.manifest = new Manifest({}, unzip.decompress("manifest.json"));
-    const tableImage = new Blob([unzip.decompress(this.manifest.table)]);
-    this.tableImageUrl = window.URL.createObjectURL(tableImage);
-    this.members = this.manifest.members.map((m) => ({
-      url: window.URL.createObjectURL(new Blob([unzip.decompress(m.file)])),
-      name: m.name,
-      image: new p5.Image(),
-    }));
-    if (unzip.getFilenames().includes("chart.json"))
-      this.chart = JSON.parse(
-        new TextDecoder().decode(unzip.decompress("chart.json"))
-      ).chart;
-  }
 
   async mounted() {
     if (this.$store.state.file == null) return this.$router.push("/");
 
-    try {
-      await this.decompress();
-    } catch (e) {
-      console.error(e);
-      return this.$router.push("/?error=invalid");
-    }			
+    this.tkms = new Tkms(await this.$store.state.file.arrayBuffer());
+    if (!this.tkms.isValid()) return this.$router.push("/?error=invalid");
 
     const script = (p5: p5) => {
       let backImage: p5.Image;
@@ -69,14 +42,15 @@ export default class Random extends Vue {
       ];
 
       p5.preload = () => {
-        backImage = p5.loadImage(this.tableImageUrl);
-        this.members = this.members.map((i) => ({
+        backImage = p5.loadImage(this.tkms.tableBlobUrl);
+        this.members = this.tkms.members.map((i) => ({
           ...i,
           image: p5.loadImage(i.url),
         }));
-        if (this.chart.length > 0) {
+        if (this.tkms.chart.length > 0) {
           this.members.sort(
-            (a, b) => this.chart.indexOf(a.name) - this.chart.indexOf(b.name)
+            (a, b) =>
+              this.tkms.chart.indexOf(a.name) - this.tkms.chart.indexOf(b.name)
           );
         } else {
           this.members = this.members
@@ -98,7 +72,7 @@ export default class Random extends Vue {
         p5.textAlign(p5.CENTER, p5.CENTER);
 
         const memberData = [...this.members];
-        this.manifest.tables.forEach((tables, tableCount) => {
+        this.tkms.tables.forEach((tables, tableCount) => {
           const tableMembers = memberData.splice(0, tables);
           tableMembers.forEach((m, i) => {
             const rad = calcRadian(i, tableMembers.length);
@@ -136,7 +110,7 @@ export default class Random extends Vue {
             p5.resizeCanvas(1600, 1200);
             p5.saveCanvas(
               canvas,
-              this.manifest.name +
+              this.tkms.name +
                 "_" +
                 new Date().toLocaleDateString().replaceAll(/\//g, "-"),
               "png"
@@ -174,10 +148,10 @@ export default class Random extends Vue {
       };
 
       function calcCanvasSize() {
-        const box = document.querySelector("#canvas") as HTMLCanvasElement;
+        const box = document.querySelector("#canvas") as HTMLDivElement;
         if (!box) return { w: 640, h: 480 };
         const width = box.clientWidth;
-        const height = box.clientHeight - 24;
+        const height = box.clientHeight;
         const isLandscape = width / 4 > height / 3;
         return {
           w: isLandscape ? (height / 3) * 4 : width,
@@ -196,7 +170,7 @@ export default class Random extends Vue {
     };
 
     new p5(script);
-    document.body.requestFullscreen();	
+    document.body.requestFullscreen();
   }
 }
 </script>

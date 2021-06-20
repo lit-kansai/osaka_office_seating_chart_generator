@@ -19,9 +19,9 @@
       </div>
     </div>
 
-    <div class="container my-6" v-show="members.length > 0">
+    <div class="container my-6" v-show="tkms.members.length > 0">
       <div class="card-box">
-        <div class="card" v-for="(member, i) in members" v-bind:key="i">
+        <div class="card" v-for="(member, i) in tkms.members" v-bind:key="i">
           <div class="card-image">
             <figure class="image member-image">
               <img :src="member.url" />
@@ -38,7 +38,7 @@
       type="is-primary"
       @click="next"
       class="next my-6"
-      :disabled="members.length == 0 || members.some(m => m.name == '')"
+      :disabled="tkms.members.length == 0 || tkms.members.some(m => m.name == '')"
       >次へ</b-button
     >
   </div>
@@ -46,12 +46,12 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { Member } from "@/models";
 import p5 from "p5";
+import { Tkms } from "@/models/tkms";
 
 @Component
 export default class Create1 extends Vue {
-  members: Member[] = [];
+  tkms: Tkms = new Tkms()
 
   mounted(): void {
     var dropZone = document.getElementById("drop_zone") as HTMLDivElement;
@@ -97,11 +97,13 @@ export default class Create1 extends Vue {
               const c = (canvas.elt as HTMLCanvasElement)
               c.toBlob(async blob => {
                 const buffer = await blob?.arrayBuffer()
-                this.members.push({
+                if(!buffer) return
+                this.tkms.members.push({
                   name: f.name.split(".").slice(0, -1).join("."),
-                  image: buffer,
+                  file: "",
                   url: window.URL.createObjectURL(blob),
-                } as Member);
+                  buffer,
+                });
               })
             };
           };
@@ -113,10 +115,10 @@ export default class Create1 extends Vue {
     );
   }
   remove(count: number): void {
-    this.members.splice(count, 1);
+    this.tkms.members.splice(count, 1);
   }
   next() {
-    this.$store.commit("setMembers", this.members);
+    this.$store.commit("setTkms", this.tkms);
     this.$router.push("/create/tables");
   }
 }

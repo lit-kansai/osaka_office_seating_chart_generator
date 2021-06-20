@@ -1,11 +1,12 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import { Member, State } from "@/models";
+import { State } from "@/models";
+import { Tkms } from "@/models/tkms";
 
 Vue.use(Vuex);
 
 const state: State = {
-  members: [],
+  tkms: null,
   tables: [],
   file: null
 }
@@ -13,8 +14,8 @@ const state: State = {
 export default new Vuex.Store({
   state,
   mutations: {
-    setMembers (state: State, members: Member[]) {
-      state.members = members
+    setTkms (state: State, tkms: Tkms) {
+      state.tkms = tkms
     },
     setTables (state: State, tables: number[]) {
       state.tables = tables

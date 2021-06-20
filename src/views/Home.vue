@@ -126,7 +126,6 @@ export default class Home extends Vue {
     pond.onupdatefiles = (files: any) => {
       if (files.length == 0) return (this.file = null);
       const name = files[0].file.name.split(".");
-      console.log(name[name.length - 1])
       if (name[name.length - 1] == "tkmsc") this.file = files[0].file;
       else if (name[name.length - 1] == "tkmscs") this.file = files[0].file;
       else this.file = null;

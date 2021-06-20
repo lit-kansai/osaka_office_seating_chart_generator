@@ -19,7 +19,7 @@
       <div class="columns" v-for="i in 2" v-bind:key="i - 1">
         <div class="column" v-for="j in 5" v-bind:key="j - 1">
           <b-numberinput
-            v-model="tables[(i - 1) * 5 + j - 1]"
+            v-model="tkms.tables[(i - 1) * 5 + j - 1]"
             min="0"
             :max="tableMax[(i - 1) * 5 + j - 1]"
             :editable="false"
@@ -36,22 +36,23 @@
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
 import p5 from "p5";
+import { Tkms } from "@/models/tkms";
 
 @Component
 export default class Create2 extends Vue {
-  tables: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  tkms: Tkms = this.$store.state.tkms;
   tableMax: number[] = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
-  memberCount = this.$store.state.members.length;
 
   created() {
-    [...Array(this.memberCount)].forEach((_, i) => {
-      this.tables[i % 10] += 1;
+    this.tkms.tables = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    [...Array(this.tkms.members.length)].forEach((_, i) => {
+      this.tkms.tables[i % 10] += 1;
     });
   }
 
   mounted(): any {
     this.changeMembers();
-    if (this.$store.state.members.length == 0)
+    if (this.tkms.members.length == 0)
       return this.$router.push("/create/members");
 
     const script = (p5: p5) => {
@@ -71,16 +72,16 @@ export default class Create2 extends Vue {
 
       const drawTables = () => {
         const r = 0.065;
-        drawTable(this.tables[0], 0.119, 0.505, r);
-        drawTable(this.tables[1], 0.3095, 0.505, r);
-        drawTable(this.tables[2], 0.5, 0.505, r);
-        drawTable(this.tables[3], 0.6905, 0.505, r);
-        drawTable(this.tables[4], 0.881, 0.505, r);
-        drawTable(this.tables[5], 0.119, 0.755, r);
-        drawTable(this.tables[6], 0.3095, 0.755, r);
-        drawTable(this.tables[7], 0.5, 0.755, r);
-        drawTable(this.tables[8], 0.6905, 0.755, r);
-        drawTable(this.tables[9], 0.881, 0.755, r);
+        drawTable(this.tkms.tables[0], 0.119, 0.505, r);
+        drawTable(this.tkms.tables[1], 0.3095, 0.505, r);
+        drawTable(this.tkms.tables[2], 0.5, 0.505, r);
+        drawTable(this.tkms.tables[3], 0.6905, 0.505, r);
+        drawTable(this.tkms.tables[4], 0.881, 0.505, r);
+        drawTable(this.tkms.tables[5], 0.119, 0.755, r);
+        drawTable(this.tkms.tables[6], 0.3095, 0.755, r);
+        drawTable(this.tkms.tables[7], 0.5, 0.755, r);
+        drawTable(this.tkms.tables[8], 0.6905, 0.755, r);
+        drawTable(this.tkms.tables[9], 0.881, 0.755, r);
       };
 
       function drawTable(members: number, xp: number, yp: number, r: number) {
@@ -105,18 +106,18 @@ export default class Create2 extends Vue {
     new p5(script);
   }
 
-  @Watch("tables")
+  @Watch("tkms.tables")
   changeMembers() {
     this.tableMax =
-      this.remains == 0 ? [...this.tables] : this.tableMax.map((_) => 6);
+      this.remains == 0 ? [...this.tkms.tables] : this.tableMax.map((_) => 6);
   }
 
   get remains() {
-    return this.memberCount - this.tables.reduce((a, b) => a + b);
+    return this.tkms.members.length - this.tkms.tables.reduce((a, b) => a + b);
   }
 
   next() {
-    this.$store.commit("setTables", this.tables);
+    this.$store.commit("setTkms", this.tkms);
     this.$router.push("/create/info");
   }
 }

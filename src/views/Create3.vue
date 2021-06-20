@@ -15,71 +15,48 @@
       <h3 class="title is-3">クラス情報</h3>
 
       <b-field label="クラス名">
-        <b-input placeholder="例: 17期 大阪日曜Bクラス" v-model="manifest.name"></b-input>
+        <b-input
+          placeholder="例: 17期 大阪日曜Bクラス"
+          v-model="tkms.name"
+        ></b-input>
       </b-field>
     </div>
 
-    <b-button type="is-primary" class="finish my-6" @click="finish" :disabled="manifest.name == ''"
+    <b-button
+      type="is-primary"
+      class="finish my-6"
+      @click="finish"
+      :disabled="tkms.name == ''"
       >完了</b-button
     >
   </div>
 </template>
 
 <script lang="ts">
-import { Manifest, Member } from "@/models";
 import { Component, Vue } from "vue-property-decorator";
-import { Zlib as ZlibZip } from "zlibjs/bin/zip.min";
+import { Tkms } from "@/models/tkms";
 
 @Component
 export default class Create3 extends Vue {
-
-  members: Member[] = this.$store.state.members;
-  manifest: Manifest = new Manifest({
-    name: "",
-    members: [],
-    tables: this.$store.state.tables,
-    table: "table.png"
-  });
+  tkms: Tkms = this.$store.state.tkms;
 
   mounted() {
-    if (this.$store.state.members.length == 0)
+    if (this.tkms.members.length == 0)
       return this.$router.push("/create/members");
-    if (this.$store.state.tables.length == 0)
+    if (this.tkms.tables.length == 0)
       return this.$router.push("/create/members");
   }
 
   async finish() {
-    const zip = new ZlibZip.Zip();
-    
-    this.manifest.members = this.members.map((m, i) => {
-      const filename = `photo/photo${('00' + i).slice(-2)}.png`;
-      zip.addFile(new Uint8Array(m.image), {
-        filename: new TextEncoder().encode(filename),
-      });
-      return {
-        name: m.name,
-        file: filename
-      }
-    })
+    const a = document.createElement("a");
+    a.href = await this.tkms.generateTkmscs();
+    a.download = `${this.tkms.name}.tkmscs`;
+    document.body.appendChild(a);
+    a.style.display = "none";
+    a.click();
+    a.remove();
 
-    const table = await fetch("/table.png")
-    zip.addFile(new Uint8Array(await table.arrayBuffer()), {
-      filename: new TextEncoder().encode(`table.png`),
-    });
-
-    zip.addFile(new TextEncoder().encode(JSON.stringify(this.manifest)), {
-      filename: new TextEncoder().encode(`manifest.json`),
-    });
-
-    const a = document.createElement('a')
-    a.href = window.URL.createObjectURL(new Blob([zip.compress()]))
-    a.download = `${this.manifest.name}.tkmscs`
-    document.body.appendChild(a)
-    a.style.display = 'none'
-    a.click()
-    a.remove()
-
-    this.$router.push('/')
+    this.$router.push("/");
   }
 }
 </script>
