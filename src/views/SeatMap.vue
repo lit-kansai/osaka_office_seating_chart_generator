@@ -126,12 +126,10 @@ export default class SeatMap extends Vue {
           tableMembers.forEach((m, i) => {
             const rad = calcRadian(i, tableMembers.length);
             this.seats.push({
-              x: (w) => 
-                0.065 * w * p5.cos(rad) +
-                w * tablePosition[tableCount].x,
-              y: (w, h) => 
-                0.065 * w * p5.sin(rad) +
-                h * tablePosition[tableCount].y,
+              x: (w) =>
+                0.065 * w * p5.cos(rad) + w * tablePosition[tableCount].x,
+              y: (w, h) =>
+                0.065 * w * p5.sin(rad) + h * tablePosition[tableCount].y,
               r: (w) => (w * 0.05) / 2,
             });
           });
@@ -154,9 +152,17 @@ export default class SeatMap extends Vue {
           if (members[i] == m) return;
           const image = getImageByName(member.name);
           if (image) p5.texture(image);
-          p5.ellipse(seat.x(p5.width), seat.y(p5.width, p5.height), seat.r(p5.width) * 2);
+          p5.ellipse(
+            seat.x(p5.width),
+            seat.y(p5.width, p5.height),
+            seat.r(p5.width) * 2
+          );
           p5.textSize(p5.width / 80);
-          p5.text(members[i].name, seat.x(p5.width), seat.y(p5.width, p5.height) + p5.width * 0.03);
+          p5.text(
+            members[i].name,
+            seat.x(p5.width),
+            seat.y(p5.width, p5.height) + p5.width * 0.03
+          );
         });
         if (m) {
           const image = getImageByName(m.name);
@@ -168,7 +174,7 @@ export default class SeatMap extends Vue {
       };
 
       function calcCanvasSize() {
-        const box = document.querySelector("#canvas") as HTMLCanvasElement;
+        const box = document.querySelector("#canvas") as HTMLDivElement;
         if (!box) return { w: 640, h: 480 };
         const width = box.clientWidth;
         const height = box.clientHeight - 24;
@@ -186,7 +192,10 @@ export default class SeatMap extends Vue {
         (pos / cap) * p5.PI * 2 + p5.PI / 2 + p5.PI + p5.PI / cap;
 
       const calcDistanceToCursor = (s: Seat) =>
-        Math.sqrt((s.x(p5.width) - p5.mouseX) ** 2 + (s.y(p5.width, p5.height) - p5.mouseY) ** 2);
+        Math.sqrt(
+          (s.x(p5.width) - p5.mouseX) ** 2 +
+            (s.y(p5.width, p5.height) - p5.mouseY) ** 2
+        );
 
       const getSelectedMember = () => {
         const nearest = this.seats.reduce((a, b) =>
@@ -263,6 +272,11 @@ export default class SeatMap extends Vue {
   justify-content: center;
   align-items: center;
   height: calc(100vh - 156px);
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
 }
 
 .columns {
